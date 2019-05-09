@@ -91,4 +91,24 @@ total 12
 total 8
 -rw-r--r-- 2 root root 5 May  8 17:46 test
 ```
+### 卸载
+```
+[root@ssy-service1 easemob]# df -h
+Filesystem       Size  Used Avail Use% Mounted on
+/dev/vda1         40G   18G   20G  47% /
+ssy-db1:easemob   40G   26G   13G  67% /home/easemob/test
+[root@ssy-service1 easemob]# umount ssy-db1:easemob
+[root@ssy-service1 easemob]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        40G   18G   20G  47% /
+[root@ssy-service1 easemob]# 
+```
+### mount失败问题处理
+```
+[root@ssy-service1 ~]# mount -t glusterfs  ssy-db1:easemob /home/easemob/test/
+Mount failed. Please check the log file for more details.
+需在gluster服务端添加访问策略（添加all后无效，原因未知）
+[root@ssy-db1 ~]# gluster volume set easemob auth.allow 10.66.179.190
+volume set: success
+```
 
