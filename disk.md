@@ -65,13 +65,15 @@ performance.client-io-threads: off
 ```
 ### 挂载并验证
 ```
+安装客户端包
+[root@ssy-service1 ~]# yum install -y glusterfs glusterfs-fuse
 复制模式
-[root@ssy-db1 ~]# mount -t glusterfs  ssy-db1:easemob /root/glus/
-[root@ssy-db1 ~]# echo 'test' > /root/glus/test   #测试
-[root@ssy-db1 ~]# ll /home/easemob/tmp/
+[root@ssy-service1 ~]# mount -t glusterfs  ssy-db1:easemob /root/glus/
+[root@ssy-service1 ~]# echo 'test' > /root/glus/test   #测试
+[root@ssy-service1 ~]# ll /home/easemob/tmp/
 total 12
 -rw-r--r-- 2 root root 5 May  8 17:46 test
-[root@ssy-db3 ~]# ll /home/easemob/tmp/ #ssy-db3上也有
+[root@ssy-service1 ~]# ll /home/easemob/tmp/ #ssy-db3上也有
 total 8
 -rw-r--r-- 2 root root 5 May  8 17:46 test
 随机模式
