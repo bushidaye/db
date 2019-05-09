@@ -6,13 +6,17 @@
 10.66.179.171   ssy-db3
 10.66.179.190   ssy-service
 ```
-### 安装包
+### 安装包(glusterfs server均需安装)
 ```
+[root@ssy-db1 ~]# yum install centos-release-gluster
+[root@ssy-db1 ~]# yum install -y glusterfs glusterfs-server glusterfs-fuse glusterfs-rdma
 [root@ssy-db3 ~]# yum install centos-release-gluster
 [root@ssy-db3 ~]# yum install -y glusterfs glusterfs-server glusterfs-fuse glusterfs-rdma
 ```
 ### 启动服务
 ```
+[root@ssy-db1 ~]# systemctl start glusterd
+[root@ssy-db1 ~]# systemctl enable glusterd  #开机启动
 [root@ssy-db3 ~]# systemctl start glusterd
 [root@ssy-db3 ~]# systemctl enable glusterd  #开机启动
 ```
@@ -28,13 +32,17 @@ peer probe: success.
 [root@ssy-db1 ~]# mkdir /home/easemob/tmp
 [root@ssy-db3 ~]# mkdir /home/easemob/tmp
 ```
-### 创建glusterfs磁盘
+### 创建glusterfs磁盘 
 ```
+复制模式
 [root@ssy-db1 ~]# gluster volume create easemob replica 2 ssy-db1:/home/easemob/tmp ssy-db3:/home/easemob/tmp force
 volume create: easemob: success: please start the volume to access data
+默认模式，随机分布
+[root@ssy-db1 ~]# gluster volume create easemob2 ssy-db1:/home/easemob/tmp2 ssy-db3:/home/easemob/tmp2  force
+volume create: easemob2: success: please start the volume to access data
 ```
 
-### 启动glusterfs volume
+### 启动刚创建的glusterfs volume
 ```
 [root@ssy-db1 ~]# gluster volume start easemob
 volume start: easemob: success
@@ -55,8 +63,9 @@ transport.address-family: inet
 nfs.disable: on
 performance.client-io-threads: off
 ```
-### 挂载
+### 挂载并验证
 ```
+复制模式
 [root@ssy-db1 ~]# mount -t glusterfs  ssy-db1:easemob /root/glus/
 [root@ssy-db1 ~]# echo 'test' > /root/glus/test   #测试
 [root@ssy-db1 ~]# ll /home/easemob/tmp/
@@ -65,6 +74,37 @@ total 12
 [root@ssy-db3 ~]# ll /home/easemob/tmp/ #ssy-db3上也有
 total 8
 -rw-r--r-- 2 root root 5 May  8 17:46 test
+随机模式
+[root@ssy-service1 ~]# mount -t glusterfs ssy-db1:easemob2 /root/liu/
+[root@ssy-service1 ~]# for i in {1..10};do echo $i >> /root/liu/$i;done
+[root@ssy-service1 ~]# ll liu/
+total 5
+-rw-r--r-- 1 root root 2 May  9 14:35 1
+-rw-r--r-- 1 root root 3 May  9 14:35 10
+-rw-r--r-- 1 root root 2 May  9 14:35 2
+-rw-r--r-- 1 root root 2 May  9 14:35 3
+-rw-r--r-- 1 root root 2 May  9 14:35 4
+-rw-r--r-- 1 root root 2 May  9 14:35 5
+-rw-r--r-- 1 root root 2 May  9 14:35 6
+-rw-r--r-- 1 root root 2 May  9 14:35 7
+-rw-r--r-- 1 root root 2 May  9 14:35 8
+-rw-r--r-- 1 root root 2 May  9 14:35 9
+
+[root@ssy-db3 ~]# ll /home/easemob/tmp2   
+total 40
+-rw-r--r-- 2 root root 3 May  9 14:35 10
+-rw-r--r-- 2 root root 2 May  9 14:35 2
+-rw-r--r-- 2 root root 2 May  9 14:35 3
+-rw-r--r-- 2 root root 2 May  9 14:35 4
+-rw-r--r-- 2 root root 2 May  9 14:35 6
+
+[root@ssy-db1 ~]# ll /home/easemob/tmp2/
+total 40
+-rw-r--r-- 2 root root 2 May  9 14:35 1
+-rw-r--r-- 2 root root 2 May  9 14:35 5
+-rw-r--r-- 2 root root 2 May  9 14:35 7
+-rw-r--r-- 2 root root 2 May  9 14:35 8
+-rw-r--r-- 2 root root 2 May  9 14:35 9
 ```
 ### 卸载
 ```
@@ -87,7 +127,7 @@ Mount failed. Please check the log file for more details.
 volume set: success
 ```
 
-# df -h卡住
+# df -h卡住问题处理
 ### 使用strace名令追踪卡住的地方
 ```
 [root@ssy-service1 ~]# strace df -h
