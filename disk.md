@@ -1,28 +1,3 @@
-# df -h卡住
-### 使用strace名令追踪卡住的地方
-```
-[root@ssy-service1 ~]# strace df -h
-execve("/usr/bin/df", ["df", "-h"], [/* 23 vars */]) = 0
-...
-...
-stat("/", {st_mode=S_IFDIR|0555, st_size=4096, ...}) = 0
-stat("/proc/sys/fs/binfmt_misc", 
-```
-### 然后重启卡住的服务
-```
-[root@ssy-service1 ~]# systemctl restart proc-sys-fs-binfmt_misc.automount
-[root@ssy-service1 ~]# 
-[root@ssy-service1 ~]# 
-[root@ssy-service1 ~]# df -h
-Filesystem      Size  Used Avail Use% Mounted on
-/dev/vda1        40G   32G  5.6G  86% /
-devtmpfs        3.9G     0  3.9G   0% /dev
-tmpfs           3.9G     0  3.9G   0% /dev/shm
-tmpfs           3.9G  408M  3.5G  11% /run
-tmpfs           3.9G     0  3.9G   0% /sys/fs/cgroup
-tmpfs           783M     0  783M   0% /run/user/0
-tmpfs           783M     0  783M   0% /run/user/1000
-```
 # glusterfs
 ### 配置主机名
 ```
@@ -112,3 +87,28 @@ Mount failed. Please check the log file for more details.
 volume set: success
 ```
 
+# df -h卡住
+### 使用strace名令追踪卡住的地方
+```
+[root@ssy-service1 ~]# strace df -h
+execve("/usr/bin/df", ["df", "-h"], [/* 23 vars */]) = 0
+...
+...
+stat("/", {st_mode=S_IFDIR|0555, st_size=4096, ...}) = 0
+stat("/proc/sys/fs/binfmt_misc", 
+```
+### 然后重启卡住的服务
+```
+[root@ssy-service1 ~]# systemctl restart proc-sys-fs-binfmt_misc.automount
+[root@ssy-service1 ~]# 
+[root@ssy-service1 ~]# 
+[root@ssy-service1 ~]# df -h
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/vda1        40G   32G  5.6G  86% /
+devtmpfs        3.9G     0  3.9G   0% /dev
+tmpfs           3.9G     0  3.9G   0% /dev/shm
+tmpfs           3.9G  408M  3.5G  11% /run
+tmpfs           3.9G     0  3.9G   0% /sys/fs/cgroup
+tmpfs           783M     0  783M   0% /run/user/0
+tmpfs           783M     0  783M   0% /run/user/1000
+```
